@@ -65,6 +65,7 @@ jobs:
         env:
             IMAGE_TAG: ${{ needs.build-and-deploy.outputs.short_sha }}
             ACR_SERVER: ${{ vars.AZURE_CONTAINER_REGISTRY_SERVER_URI }}
+            DB_CONNECTION_STRING: ${{ secrets.DB_CONN_STR }}
         with:
             registryUrl: ${{ vars.AZURE_CONTAINER_REGISTRY_SERVER_URI }}
             imageToDeploy: $ACR_SERVER/f1app:$IMAGE_TAG
@@ -74,4 +75,4 @@ jobs:
             containerAppEnvironment: F1-container-app-envdev
             resourceGroup: F1_rg_central_india
             environmentVariables: |
-                ASPNETCORE_ENVIRONMENT=Development ASPNETCORE_URLS=http://+:8080
+                ASPNETCORE_ENVIRONMENT=Development ASPNETCORE_URLS=http://+:8080 ConnectionStrings__DefaultConnection=$DB_CONNECTION_STRING
