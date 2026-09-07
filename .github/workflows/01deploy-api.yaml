@@ -75,4 +75,4 @@ jobs:
             containerAppEnvironment: F1-container-app-envdev
             resourceGroup: F1_rg_central_india
             environmentVariables: |
-                ASPNETCORE_ENVIRONMENT=Development ASPNETCORE_URLS=http://+:8080 ConnectionStrings__DefaultConnection=$DB_CONNECTION_STRING
+                ASPNETCORE_ENVIRONMENT=Development ASPNETCORE_URLS=http://+:8080 DefaultConnectionMsSql=$DB_CONNECTION_STRING
