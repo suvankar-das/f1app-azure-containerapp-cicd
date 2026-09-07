@@ -1,4 +1,4 @@
-name : Build and Deploy API to Azure portal
+name: Build and Deploy API to Azure portal
 
 # This workflow will build and deploy the API to Azure portal when there is a push to the main branch.
 on:
@@ -6,29 +6,33 @@ on:
     branches:
       - main
 
-# Job is a collection of steps that run in an environment.
-# In simple word , job is a workflow of the pipeline.
 jobs:
-    build-and-deploy:
-        runs-on: ubuntu-latest
-        
-        steps:
-            # Checkout code from the repository to the ubuntu-latest environment.
-            - name: Checkout code
-              id: github-checkout
-              uses: actions/checkout@v3
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
-            # Set up .NET environment to build the API on ubuntu-latest environment.
-            - name: Set up Web api core .NET
-              uses: actions/setup-dotnet@v3
-              with:
-                dotnet-version: '8.0.x'
+    steps:
+      # Checkout code from the repository
+      - name: Checkout code
+        id: github-checkout
+        uses: actions/checkout@v4
 
-            # Connecting to Azure Container Registry (ACR) to push the docker image of the API to ACR.
-            - name: Configure Azure Container Registry (ACR) credentials
-              uses: azure/docker-login@v2
-              with:
-                login-server: ${{ vars.AZURE_CONTAINER_REGISTRY_SERVER_URI }}
-                username: ${{ secrets.ACR_USERNAME }}
-                password: ${{ secrets.ACR_PASSWORD }}
+      # Set up .NET environment to build the API
+      - name: Set up Web api core .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
 
+      # Log in to Azure Container Registry (ACR)
+      - name: Configure Azure Container Registry (ACR) credentials
+        uses: azure/docker-login@v2
+        with:
+          login-server: ${{ vars.AZURE_CONTAINER_REGISTRY_SERVER_URI }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      # Get short commit SHA for image tagging
+      - name: SHA of the commit
+        id: vars
+        run: |
+          calculatedSha=$(git rev-parse --short ${{ github.sha }})
+          echo "sha=$calculatedSha" >> "$GITHUB_OUTPUT"
