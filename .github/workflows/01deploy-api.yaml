@@ -48,7 +48,7 @@ jobs:
             docker build -f FormulaOne.Dockerfile -t $ACR_REGISTRY/f1app:$IMAGE_TAG -t $ACR_REGISTRY/f1app:latest .
             docker push $ACR_REGISTRY/f1app --all-tags
       
-
+  # Step 2: Deploy the Docker image to Azure Container Service (ACS)
   deploy-container-to-ACS:
     runs-on: ubuntu-latest
     needs: build-and-deploy
@@ -60,10 +60,18 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # Deploy the Docker image to Azure Container Service (ACS)
-      - name: Deploy Docker image to ACS
-        uses: azure/login@v1
-
+      - name: build and deploy to ACR
+        uses: azure/container-apps-deploy-action@v1
+        env:
+            IMAGE_TAG: ${{ needs.build-and-deploy.outputs.short_sha }}
+            ACR_SERVER: ${{ vars.AZURE_CONTAINER_REGISTRY_SERVER_URI }}
         with:
-            # generate by running `az ad sp create-for-rbac --name github-auth --role Contributor --scopes /subscriptions/d34b7f0b-cdd0-400e-a019-57d8be48b7ef/resourceGroups/F1_rg_central_india --json-auth`
-            creds: ${{ secrets.AZURE_CREDENTIALS }}
+            registryUrl: ${{ vars.AZURE_CONTAINER_REGISTRY_SERVER_URI }}
+            imageToDeploy: $ACR_SERVER/f1app:$IMAGE_TAG
+            targetPort: 8080
+            ingress: external
+            containerAppName: f1-azure-container-app-cen-india
+            containerAppEnvironment: F1-container-app-envdev
+            resourceGroup: F1_rg_central_india
+            environmentVariables: |
+                ASPNETCORE_ENVIRONMENT=Development ASPNETCORE_URLS=http://+:8080
