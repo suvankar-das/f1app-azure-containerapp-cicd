@@ -34,5 +34,17 @@ jobs:
       - name: SHA of the commit
         id: vars
         run: |
-          calculatedSha=$(git rev-parse --short ${{ github.sha }})
-          echo "sha=$calculatedSha" >> "$GITHUB_OUTPUT"
+            calculatedSha=$(git rev-parse --short ${{ github.sha }})
+            echo "::set-output name=short_sha::$calculatedSha"
+
+     # Build and push the Docker image to Azure Container Registry (ACR)
+      - name: Build and push Docker image to ACR
+        env:
+            ACR_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY_SERVER_URI }}
+            IMAGE_TAG: ${{ steps.vars.outputs.short_sha }}
+        run: |
+            docker build -f FormulaOne.Dockerfile -t $ACR_REGISTRY/f1app:$IMAGE_TAG -t $ACR_REGISTRY/f1app:latest .
+            docker push $ACR_REGISTRY/f1app --all-tags
+      
+
+    
